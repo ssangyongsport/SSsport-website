@@ -17,3 +17,33 @@ export default async function Page({
   if (page == null) {
     notFound()
   }
+ 
+  const toc = await getTableOfContents(page.body.raw)
+  const neighbour = findNeighbour(tree, getPageUrl(params.slug))
+ 
+  return (
+    <DocsPage toc={toc} footer={neighbour}>
+      <MDXContent>
+        <h1>{page.title}</h1>
+        <Content code={page.body.code} />
+      </MDXContent>
+    </DocsPage>
+  )
+}
+ 
+export async function generateStaticParams(): Promise<{ slug: string[] }[]> {
+  return allDocs.map(page => ({
+    slug: page.slug.split('/')
+  }))
+}
+ 
+export function generateMetadata({ params }: { params: { slug?: string[] } }) {
+  const page = getPage(params.slug)
+ 
+  if (page == null) return
+ 
+  return {
+    title: page.title,
+    description: page.description
+  } satisfies Metadata
+}
